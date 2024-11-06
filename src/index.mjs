@@ -1,10 +1,13 @@
 import express from "express";
 // const path = require("path");
-import { body, query, validationResult } from "express-validator";
-
+import { body, query, validationResult, checkSchema } from "express-validator";
+import { createUserVAlidateScheme } from "./utlis/validatorsSchema.mjs";
+import UserRouter from "./routes/users.mjs";
+import { mockUsers } from "./utlis/constants.mjs";
 const app = express();
 
 app.use(express.json());
+app.use(UserRouter);
 
 const loggingMiddleware = (req, res, next) => {
   console.log(`${req.method}--${req.url}`);
@@ -34,18 +37,6 @@ app.use(
 //------------
 const port = parseInt(process.env.PORT) || process.argv[3] || 8080;
 
-const mockUsers = [
-  { id: 1, username: "navin", email: "william.on@example-pet-store.com" },
-  { id: 2, username: "amer", email: "william2.@example-pet-store.com" },
-  { id: 3, username: "reethu", email: "william2.@example-pet-store.com" },
-  { id: 4, username: "dillibai", email: "jessica.smith@example-pet-store.com" },
-  { id: 5, username: "anan", email: "michael.jones@example-pet-store.com" },
-  { id: 6, username: "anandh", email: "sarah.brown@example-pet-store.com" },
-  { id: 7, username: "mano", email: "david.wilson@example-pet-store.com" },
-  { id: 8, username: "deena", email: "emma.johnson@example-pet-store.com" },
-  { id: 9, username: "raja", email: "james.miller@example-pet-store.com" },
-  { id: 10, username: "ravi", email: "olivia.davis@example-pet-store.com" },
-];
 // app
 //   .use(express.static(path.join(__dirname, "public")))
 //   .set("views", path.join(__dirname, "views"))
@@ -70,17 +61,6 @@ app.get("/api", (req, res) => {
 
 //get query request
 //express-validator --> query()
-app.get("/api/users", query("filter").isString().notEmpty(), (req, res) => {
-  //   res.send(req.query);
-  const {
-    query: { filter, value },
-  } = req;
-
-  if (filter && value)
-    return res.send(mockUsers.filter((user) => user[filter].includes(value)));
-  //when the filter and value undefined
-  return res.send(mockUsers);
-});
 
 app.get("/api/users/:id", resolveUserById, (req, res) => {
   const { findUserIndex } = req;
@@ -100,16 +80,19 @@ app.get("/api/products", (req, res) => {
 //validators----
 app.post(
   "/api/users",
-  [
-    body("username")
-      .notEmpty()
-      .withMessage("User name cant be empty")
-      .isLength({ min: 5, max: 32 })
-      .withMessage("username must be atleast 5 to 32 characters")
-      .isString()
-      .withMessage("Username must be String"),
-    body("email").notEmpty().withMessage("Email cant be Empty"),
-  ],
+  // [
+  //   body("username")
+  //     .notEmpty()
+  //     .withMessage("Username cant be empty")
+  //     .isLength({ min: 5, max: 32 })
+  //     .withMessage("username must be atleast 5 to 32 characters")
+  //     .isString()
+  //     .withMessage("Username must be String"),
+  //   body("email").notEmpty().withMessage("Email cant be Empty"),
+  // ],
+
+  //-checkschema
+  checkSchema(createUserVAlidateScheme),
   (req, res) => {
     const result = validationResult(req);
     console.log(result);
