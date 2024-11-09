@@ -30,7 +30,7 @@ router.get(
   (req, res) => {
     //   res.send(req.query);
     const result = validationResult(req);
-    console.log(result);
+    // console.log(result);
     const {
       query: { filter, value },
     } = req;
@@ -68,7 +68,7 @@ router.post(
   checkSchema(createUserVAlidateScheme),
   (req, res) => {
     const result = validationResult(req);
-    console.log(result);
+    // console.log(result);
     console.log(req.body);
     if (!result.isEmpty())
       return res.status(400).send({ errors: result.array() });
