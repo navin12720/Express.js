@@ -24,7 +24,7 @@ app.get(
     next();
   },
   (req, res) => {
-    res.cookie("hello", "world", { maxAge: 6000 }); //one hour cookie live
+    res.cookie("hello", "world", { maxAge: 6000 }); //one min cookie live
     res.send("first page");
   }
 );
