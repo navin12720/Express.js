@@ -3,6 +3,7 @@ import { query, validationResult, checkSchema } from "express-validator";
 import { mockUsers } from "../utlis/constants.mjs";
 import { createUserVAlidateScheme } from "../utlis/validatorsSchema.mjs";
 import { resolveUserById, loggingMiddleware } from "../utlis/middleware.mjs";
+import { User } from "../mongoose_Schema/User.mjs";
 
 const router = Router();
 
@@ -53,31 +54,47 @@ router.get("/api/users/:id", resolveUserById, (req, res) => {
 //validators----
 router.post(
   "/api/users",
-  // [
-  //   body("username")
-  //     .notEmpty()
-  //     .withMessage("Username cant be empty")
-  //     .isLength({ min: 5, max: 32 })
-  //     .withMessage("username must be atleast 5 to 32 characters")
-  //     .isString()
-  //     .withMessage("Username must be String"),
-  //   body("email").notEmpty().withMessage("Email cant be Empty"),
-  // ],
-
-  //-checkschema
-  checkSchema(createUserVAlidateScheme),
-  (req, res) => {
-    const result = validationResult(req);
-    // console.log(result);
-    console.log(req.body);
-    if (!result.isEmpty())
-      return res.status(400).send({ errors: result.array() });
+  //------DB MONGO--------
+  async (req, res) => {
     const { body } = req;
-    const newusers = { id: mockUsers[mockUsers.length - 1].id + 1, ...body };
-    mockUsers.push(newusers);
-    return res.status(201).send(newusers);
+    const newUser = new User(body);
+    try {
+      const SavedUser = await newUser.save();
+      return res.status(201).send(SavedUser);
+    } catch (err) {
+      console.log(err);
+      return res.status(400).send({ msg: "User Not Saved!!!" });
+    }
   }
 );
+//-------------------------
+// [
+//   body("username")
+//     .notEmpty()
+//     .withMessage("Username cant be empty")
+//     .isLength({ min: 5, max: 32 })
+//     .withMessage("username must be atleast 5 to 32 characters")
+//     .isString()
+//     .withMessage("Username must be String"),
+//   body("email").notEmpty().withMessage("Email cant be Empty"),
+// ],
+
+//-checkschema-------
+// checkSchema(createUserVAlidateScheme),
+// (req, res) => {
+//   const result = validationResult(req);
+//   // console.log(result);
+//   console.log(req.body);
+//   if (!result.isEmpty())
+//     return res.status(400).send({ errors: result.array() });
+//   const { body } = req;
+//   const newusers = { id: mockUsers[mockUsers.length - 1].id + 1, ...body };
+//   mockUsers.push(newusers);
+//   return res.status(201).send(newusers);
+// }
+//);
+//---------------
+
 //put request
 //to update whole data
 router.put("/api/users/:id", resolveUserById, (req, res) => {
